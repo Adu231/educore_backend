@@ -2,17 +2,26 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-function getEnv(name: string, fallback?: string): string {
-  const value = process.env[name] || fallback;
+function getEnv(name: string): string {
+  const value = process.env[name];
+
   if (!value) {
-    throw new Error(`Environment variable ${name} is required but was not defined.`);
+    throw new Error(
+      `Environment variable ${name} is required but was not defined.`
+    );
   }
+
   return value;
 }
 
 export const env = {
-  PORT: parseInt(getEnv("PORT", "5000"), 10),
-  MONGODB_URI: getEnv("MONGODB_URI", "mongodb://localhost:27017/educore"),
-  JWT_SECRET: getEnv("JWT_SECRET", "supersecure_randomsecretkey_educore2026"),
+  PORT: parseInt(process.env.PORT || "5000", 10),
+
+  // MongoDB Atlas connection string from Render Environment Variables
+  MONGODB_URI: getEnv("MONGODB_URI"),
+
+  // JWT Secret from Render Environment Variables
+  JWT_SECRET: getEnv("JWT_SECRET"),
+
   NODE_ENV: process.env.NODE_ENV || "development",
 };
