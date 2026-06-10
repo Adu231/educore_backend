@@ -1,0 +1,1081 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "EduCore Backend API",
+    "version": "1.0.0",
+    "description": "API Documentation for the EduCore Student and Portal Dashboard backend. Support two URL configurations: `/api/...` namespace prefix and direct root path."
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "API Namespace Prefix"
+    },
+    {
+      "url": "/",
+      "description": "Direct Root Path (Compatibility Mode)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "enum": ["student", "admin"] },
+          "avatar": { "type": "string" },
+          "rollNumber": { "type": "string" },
+          "department": { "type": "string" },
+          "semester": { "type": "string" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "joinDate": { "type": "string" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password", "role"],
+        "properties": {
+          "email": { "type": "string", "example": "student@educore.com" },
+          "password": { "type": "string", "example": "demo123password" },
+          "role": { "type": "string", "enum": ["student", "admin"], "example": "student" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "password", "role"],
+        "properties": {
+          "name": { "type": "string", "example": "Jane Doe" },
+          "email": { "type": "string", "example": "jane@educore.com" },
+          "password": { "type": "string", "example": "securepassword123" },
+          "role": { "type": "string", "enum": ["student", "admin"], "example": "student" }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": { "type": "string", "example": "student@educore.com" }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Alex Johnson" },
+          "phone": { "type": "string", "example": "+1 (555) 999-8888" },
+          "address": { "type": "string", "example": "456 Campus Lane, University City" }
+        }
+      },
+      "UpdateAvatarRequest": {
+        "type": "object",
+        "required": ["avatarUrl"],
+        "properties": {
+          "avatarUrl": { "type": "string", "example": "https://educore-storage.s3.amazonaws.com/avatars/s001.jpg" }
+        }
+      },
+      "AssignmentSubmissionRequest": {
+        "type": "object",
+        "required": ["fileUrl"],
+        "properties": {
+          "fileUrl": { "type": "string", "example": "https://educore-storage.s3.amazonaws.com/submissions/s001.zip" },
+          "notes": { "type": "string", "example": "Code comments added." }
+        }
+      },
+      "StudentCreateRequest": {
+        "type": "object",
+        "required": ["id", "name", "email"],
+        "properties": {
+          "id": { "type": "string", "example": "CS2021009" },
+          "name": { "type": "string", "example": "Jane Johnson" },
+          "email": { "type": "string", "example": "jane.j@student.edu" },
+          "phone": { "type": "string", "example": "+1 555-9009" },
+          "department": { "type": "string", "example": "Computer Science" },
+          "semester": { "type": "string", "example": "6th" },
+          "attendance": { "type": "number", "example": 95 },
+          "cgpa": { "type": "number", "example": 9.2 },
+          "status": { "type": "string", "example": "active" }
+        }
+      },
+      "FacultyCreateRequest": {
+        "type": "object",
+        "required": ["id", "name", "email"],
+        "properties": {
+          "id": { "type": "string", "example": "F007" },
+          "name": { "type": "string", "example": "Prof. David Lee" },
+          "email": { "type": "string", "example": "lee@faculty.edu" },
+          "phone": { "type": "string", "example": "+1 555-7007" },
+          "subject": { "type": "string", "example": "AI Fundamentals" },
+          "department": { "type": "string", "example": "Computer Science" },
+          "experience": { "type": "string", "example": "8 years" },
+          "qualification": { "type": "string", "example": "Ph.D. in Computer Science" },
+          "status": { "type": "string", "example": "active" }
+        }
+      },
+      "PublishResultRequest": {
+        "type": "object",
+        "required": ["semester", "year", "subjects"],
+        "properties": {
+          "semester": { "type": "string", "example": "Semester 5" },
+          "year": { "type": "string", "example": "2023-24" },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "internal", "external"],
+              "properties": {
+                "name": { "type": "string", "example": "Data Structures" },
+                "internal": { "type": "number", "example": 28 },
+                "external": { "type": "number", "example": 62 }
+              }
+            }
+          }
+        }
+      },
+      "UpdateResultGpaRequest": {
+        "type": "object",
+        "required": ["sgpa", "cgpa"],
+        "properties": {
+          "sgpa": { "type": "number", "example": 9.4 },
+          "cgpa": { "type": "number", "example": 8.9 }
+        }
+      },
+      "ResultSubjectRequest": {
+        "type": "object",
+        "required": ["name", "internal", "external"],
+        "properties": {
+          "name": { "type": "string", "example": "Operating Systems" },
+          "internal": { "type": "number", "example": 25 },
+          "external": { "type": "number", "example": 55 }
+        }
+      },
+      "ContactFormRequest": {
+        "type": "object",
+        "required": ["name", "email", "subject", "message", "type"],
+        "properties": {
+          "name": { "type": "string", "example": "John Doe" },
+          "email": { "type": "string", "example": "john.doe@company.com" },
+          "subject": { "type": "string", "example": "Platform Trial Details" },
+          "message": { "type": "string", "example": "We would like to request an demo." },
+          "type": { "type": "string", "example": "sales" }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": ["planName", "billingCycle", "amountPaid", "cardDetails"],
+        "properties": {
+          "planName": { "type": "string", "example": "EduCore Enterprise" },
+          "billingCycle": { "type": "string", "example": "yearly" },
+          "amountPaid": { "type": "number", "example": 490 },
+          "cardDetails": { "type": "string", "example": "Visa **** 4242" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login User",
+        "description": "Authenticates user email and password against the selected role and issues a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register User",
+        "description": "Registers a new student or admin user record.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created successfully"
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Forgot Password",
+        "description": "Dispatches a recovery link to the user's email address.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset link sent"
+          }
+        }
+      }
+    },
+    "/profile/update": {
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Update Profile",
+        "description": "Updates profile details for the authenticated user.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          }
+        }
+      }
+    },
+    "/profile/avatar": {
+      "patch": {
+        "tags": ["Profile"],
+        "summary": "Upload Profile Picture",
+        "description": "Updates the avatar image URL for the authenticated user.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateAvatarRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar updated successfully"
+          }
+        }
+      }
+    },
+    "/student/attendance": {
+      "get": {
+        "tags": ["Student Portal"],
+        "summary": "Get Attendance Records",
+        "description": "Fetches detailed subject-wise attendance percentages and counts for the logged-in student.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Attendance list"
+          }
+        }
+      }
+    },
+    "/student/attendance/trend": {
+      "get": {
+        "tags": ["Student Portal"],
+        "summary": "Get Attendance Trend",
+        "description": "Fetches historical attendance percentages across months for charts.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Monthly attendance trend"
+          }
+        }
+      }
+    },
+    "/student/assignments": {
+      "get": {
+        "tags": ["Student Portal"],
+        "summary": "Get Assignments List",
+        "description": "Fetches student's assignments, scores, description, and status flags.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Assignments list"
+          }
+        }
+      }
+    },
+    "/student/assignments/{id}/submit": {
+      "post": {
+        "tags": ["Student Portal"],
+        "summary": "Submit Assignment File",
+        "description": "Uploads assignment file URL along with optional submission notes.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignmentSubmissionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment submitted successfully"
+          }
+        }
+      }
+    },
+    "/student/results/{id}": {
+      "get": {
+        "tags": ["Student Portal"],
+        "summary": "Get Academic Results by Student ID",
+        "description": "Fetches semester-wise lists of subjects, marks, SGPA, and cumulative CGPA for a student by their ID.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Student ID",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Results list"
+          }
+        }
+      }
+    },
+    "/student/timetable": {
+      "get": {
+        "tags": ["Student Portal"],
+        "summary": "Get Timetable",
+        "description": "Retrieves weekly schedule slots mapped by days.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Timetable slots"
+          }
+        }
+      }
+    },
+    "/admin/metrics": {
+      "get": {
+        "tags": ["Admin Portal"],
+        "summary": "Get Admin Dashboard Metrics",
+        "description": "High-level statistical card metrics for the main admin screen.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Metrics statistics"
+          }
+        }
+      }
+    },
+    "/admin/results": {
+      "get": {
+        "tags": ["Admin Portal"],
+        "summary": "Get All Student Results",
+        "description": "Fetches all academic results for all students in the database.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "All results in database"
+          }
+        }
+      }
+    },
+    "/admin/students": {
+      "get": {
+        "tags": ["Admin Portal - Students"],
+        "summary": "Get All Students",
+        "description": "Admin operation to view list of all students.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of students"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin Portal - Students"],
+        "summary": "Create Student Record",
+        "description": "Admin operation to create a new student user record.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StudentCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Student record created successfully"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}": {
+      "put": {
+        "tags": ["Admin Portal - Students"],
+        "summary": "Update Student Record",
+        "description": "Admin operation to update student details.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StudentCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Student updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin Portal - Students"],
+        "summary": "Delete Student Record",
+        "description": "Admin operation to delete a student.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student record deleted successfully"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}/results": {
+      "get": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Get Results for Student",
+        "description": "Retrieve academic results for a specific student.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Results details"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Publish Semester Results",
+        "description": "Publish a student's semester result.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PublishResultRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Semester results successfully published"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}/results/{semester}": {
+      "delete": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Delete Student Semester Result Record",
+        "description": "Removes a specific student's semester result document.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "semester",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Semester record deleted successfully"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}/results/{semester}/gpa": {
+      "put": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Semester Result GPA Adjustments",
+        "description": "Directly edits SGPA and CGPA metrics for a specific student's semester.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "semester",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateResultGpaRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "GPAs updated successfully"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}/results/{semester}/subjects": {
+      "post": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Add Subject to Result",
+        "description": "Manage subject-specific grades inside an existing semester document.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "semester",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResultSubjectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subject record added successfully"
+          }
+        }
+      }
+    },
+    "/admin/students/{id}/results/{semester}/subjects/{index}": {
+      "put": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Update Subject inside Results",
+        "description": "Updates grades/scores of a subject at a given array index inside results.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "semester",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResultSubjectRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subject record updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin Portal - Results"],
+        "summary": "Delete Subject inside Results",
+        "description": "Deletes a subject at a given array index inside results.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "semester",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subject record deleted successfully"
+          }
+        }
+      }
+    },
+    "/admin/faculty": {
+      "get": {
+        "tags": ["Admin Portal - Faculty"],
+        "summary": "Get All Faculty",
+        "description": "Admin operation to view list of all faculty records.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of faculty"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin Portal - Faculty"],
+        "summary": "Create Faculty Record",
+        "description": "Admin operation to create a new faculty record.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FacultyCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Faculty record created successfully"
+          }
+        }
+      }
+    },
+    "/admin/faculty/{id}": {
+      "put": {
+        "tags": ["Admin Portal - Faculty"],
+        "summary": "Update Faculty Record",
+        "description": "Admin operation to update faculty details.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FacultyCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Faculty updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin Portal - Faculty"],
+        "summary": "Delete Faculty Record",
+        "description": "Admin operation to delete a faculty member.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Faculty record deleted successfully"
+          }
+        }
+      }
+    },
+    "/admin/timetable": {
+      "get": {
+        "tags": ["Admin Portal - Timetable"],
+        "summary": "Get Timetable layouts",
+        "description": "Retrieve all day timetable layouts.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Timetables lists"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin Portal - Timetable"],
+        "summary": "Create Timetable Layout Day",
+        "description": "Create a new weekday timetable container.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["day"],
+                "properties": {
+                  "day": { "type": "string", "example": "Monday" },
+                  "slots": { "type": "array", "items": { "type": "object" } },
+                  "roleScope": { "type": "string", "example": "all" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Timetable created successfully"
+          }
+        }
+      }
+    },
+    "/admin/timetable/{day}/{index}": {
+      "put": {
+        "tags": ["Admin Portal - Timetable"],
+        "summary": "Modify Slot at Index",
+        "description": "Modifies a schedule slot at a given index on a specific day.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "time": { "type": "string", "example": "09:00 - 10:00" },
+                  "subject": { "type": "string", "example": "Operating Systems" },
+                  "faculty": { "type": "string", "example": "Prof. Davis" },
+                  "room": { "type": "string", "example": "CS-102" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Timetable slot updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin Portal - Timetable"],
+        "summary": "Delete Timetable Slot",
+        "description": "Deletes a timetable slot at a given index on a specific day.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timetable slot deleted successfully"
+          }
+        }
+      }
+    },
+    "/admin/notices": {
+      "get": {
+        "tags": ["Admin Portal - Notices"],
+        "summary": "Get Notices Board",
+        "description": "Admin notices list.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Notices list"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin Portal - Notices"],
+        "summary": "Publish Notice Bulletin",
+        "description": "Creates a notice board announcement.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "category", "content"],
+                "properties": {
+                  "title": { "type": "string", "example": "Examination Schedule" },
+                  "category": { "type": "string", "example": "Academic" },
+                  "content": { "type": "string", "example": "Exam timetable will be uploaded soon." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Notice bulletin published successfully"
+          }
+        }
+      }
+    },
+    "/admin/notices/{id}/publish": {
+      "patch": {
+        "tags": ["Admin Portal - Notices"],
+        "summary": "Toggle Publish Notice Status",
+        "description": "Updates notice publish boolean flag.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["published"],
+                "properties": {
+                  "published": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notice publish flag toggled successfully"
+          }
+        }
+      }
+    },
+    "/admin/analytics/enrollment-growth": {
+      "get": {
+        "tags": ["Admin Portal - Analytics"],
+        "summary": "Get Analytics Reports",
+        "description": "Retrieves month-by-month student growth rates.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Enrollment growth data"
+          }
+        }
+      }
+    },
+    "/marketing/contact": {
+      "post": {
+        "tags": ["Marketing"],
+        "summary": "Submit Contact Form Inquiry",
+        "description": "Receives contact page inquiries.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactFormRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inquiry received successfully"
+          }
+        }
+      }
+    },
+    "/marketing/newsletter": {
+      "post": {
+        "tags": ["Marketing"],
+        "summary": "Newsletter Subscription",
+        "description": "Subscribes user email to newsletter list.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "example": "subscriber@email.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscribed successfully"
+          }
+        }
+      }
+    },
+    "/blog/posts": {
+      "get": {
+        "tags": ["Marketing"],
+        "summary": "Get Blog Posts List",
+        "description": "Fetches blog posts sorted by date.",
+        "responses": {
+          "200": {
+            "description": "List of blog posts"
+          }
+        }
+      }
+    },
+    "/payment/checkout": {
+      "post": {
+        "tags": ["Checkout & Billing"],
+        "summary": "Portal Billing Checkout",
+        "description": "Processes mock portal billing checkout transactions.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment verified and processed successfully"
+          }
+        }
+      }
+    }
+  }
+}
